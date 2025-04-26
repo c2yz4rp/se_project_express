@@ -5,7 +5,9 @@ const getUsers = (req, res) => {
     .then((users) => res.status(200).send(users))
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: err.message });
+      return res
+        .status(500)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -15,10 +17,14 @@ const createUser = (req, res) => {
   User.create({ name, avatar })
     .then((user) => res.status(201).send(user))
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
+      if (err) {
+        return res
+          .status(400)
+          .send({ message: "An error has occurred on the server" });
       }
-      return res.status(500).send({ message: err.message });
+      return res
+        .status(500)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -28,12 +34,14 @@ const getUser = (req, res) => {
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
-      if (err.name === "DocumentNotFoundError") {
-        res.status(404).send({ message: err.message });
-      } else if (err.name === "CastError") {
-        res.status(400).send({ message: err.message });
+      if (err) {
+        res
+          .status(404)
+          .send({ message: "An error has occurred on the server" });
       }
-      return res.status(500).send({ message: err.message });
+      return res
+        .status(500)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 

@@ -1,4 +1,4 @@
-const ClothingItem = require("../models/clothingItems");
+const clothingItemSchema = require("../models/clothingItem");
 const {
   DEFAULT,
   BAD_REQUEST,
@@ -13,7 +13,8 @@ const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
-  ClothingItem.create({ name, weather, imageUrl, owner })
+  clothingItemSchema
+    .create({ name, weather, imageUrl, owner })
     .then((item) => {
       console.log(item);
       res.status(200).json(item);
@@ -32,7 +33,8 @@ const getItems = (req, res) => {
   const { itemId } = req.params;
   console.log(itemId);
 
-  ClothingItem.find({})
+  clothingItemSchema
+    .find({})
     .then((items) => res.status(200).json(items))
     .catch((err) => {
       console.error(err);
@@ -51,7 +53,8 @@ const deleteItem = (req, res) => {
       .json({ message: "Authentication required" });
   }
 
-  return ClothingItem.findById(itemId)
+  return clothingItemSchema
+    .findById(itemId)
     .orFail()
     .then((item) => {
       if (item.owner.toString() !== req.user._id.toString()) {
@@ -59,9 +62,9 @@ const deleteItem = (req, res) => {
           .status(FORBIDDEN_ERROR)
           .json({ message: "You are not authorized to delete this item" });
       }
-      return ClothingItem.findByIdAndDelete(itemId).then((deletedItem) =>
-        res.status(200).send(deletedItem)
-      );
+      return clothingItemSchema
+        .findByIdAndDelete(itemId)
+        .then((deletedItem) => res.status(200).send(deletedItem));
     })
     .catch((err) => {
       console.error("Item deletion error", err);
@@ -84,11 +87,12 @@ const deleteItem = (req, res) => {
 
 const likeItem = (req, res) => {
   // http://localhost:3001/items/12d124d121212/likes
-  ClothingItem.findByIdAndUpdate(
-    req.params.itemId,
-    { $addToSet: { likes: req.user._id } },
-    { new: true }
-  )
+  clothingItemSchema
+    .findByIdAndUpdate(
+      req.params.itemId,
+      { $addToSet: { likes: req.user._id } },
+      { new: true }
+    )
     .orFail()
     .then((items) => res.status(200).send(items))
     .catch((err) => {
@@ -103,11 +107,12 @@ const likeItem = (req, res) => {
 };
 
 const deleteLike = (req, res) => {
-  ClothingItem.findByIdAndUpdate(
-    req.params.itemId,
-    { $pull: { likes: req.user._id } },
-    { new: true }
-  )
+  clothingItemSchema
+    .findByIdAndUpdate(
+      req.params.itemId,
+      { $pull: { likes: req.user._id } },
+      { new: true }
+    )
     .orFail()
     .then((items) => res.status(200).json(items))
     .catch((err) => {
