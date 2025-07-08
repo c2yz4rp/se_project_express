@@ -20,7 +20,7 @@ module.exports = {
     sourceType: "module",
   },
   rules: {
-    "no-console": ["error", { allow: ["warn"] }],
+    "no-console": ["off", { allow: ["warn"] }],
     "no-underscore-dangle": ["error", { allow: ["_id"] }],
   },
 };
