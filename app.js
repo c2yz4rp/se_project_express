@@ -15,7 +15,7 @@ mongoose
 
 app.use((req, res, next) => {
   req.user = {
-    _id: "Chin_18-1743396732918", // paste the _id of the test user created in the previous step
+    _id: "61eade4c6d5acf558c42d9b8", // paste the _id of the test user created in the previous step
   };
   next();
 });

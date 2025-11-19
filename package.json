@@ -5,14 +5,14 @@
   "main": "app.js",
   "scripts": {
     "lint": "npx eslint .",
-    "start": "node app.js",
+    "start": "nodemon app.js",
     "dev": "nodemon app.js"
   },
   "author": "Cinthia Patino",
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.2",
-    "mongoose": "^8.13.1",
+    "mongoose": "^8.16.2",
     "validator": "^13.12.0"
   },
   "devDependencies": {

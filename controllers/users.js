@@ -1,12 +1,13 @@
 const User = require("../models/user");
+const { DEFAULT, BAD_REQUEST, NOT_FOUND } = require("../utils/errors");
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send(users))
+    .then((users) => res.send(users))
     .catch((err) => {
       console.error(err);
       return res
-        .status(500)
+        .status(DEFAULT)
         .send({ message: "An error has occurred on the server" });
     });
 };
@@ -19,11 +20,11 @@ const createUser = (req, res) => {
     .catch((err) => {
       if (err) {
         return res
-          .status(400)
+          .status(BAD_REQUEST)
           .send({ message: "An error has occurred on the server" });
       }
       return res
-        .status(500)
+        .status(DEFAULT)
         .send({ message: "An error has occurred on the server" });
     });
 };
@@ -31,16 +32,16 @@ const createUser = (req, res) => {
 const getUser = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       console.error(err);
       if (err) {
         res
-          .status(404)
+          .status(NOT_FOUND)
           .send({ message: "An error has occurred on the server" });
       }
       return res
-        .status(500)
+        .status(DEFAULT)
         .send({ message: "An error has occurred on the server" });
     });
 };
