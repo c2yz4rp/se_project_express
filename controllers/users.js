@@ -32,13 +32,16 @@ const createUser = (req, res) => {
 const getUser = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
-    .then((user) => res.send(user))
+    .then((user) => {
+      if (!user) {
+        return res.status(NOT_FOUND).send({ message: "User not found" });
+      }
+      return res.send(user);
+    })
     .catch((err) => {
       console.error(err);
-      if (err) {
-        res
-          .status(NOT_FOUND)
-          .send({ message: "An error has occurred on the server" });
+      if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).send({ message: "Invalid user ID" });
       }
       return res
         .status(DEFAULT)
