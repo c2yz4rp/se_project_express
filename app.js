@@ -13,13 +13,6 @@ mongoose
   })
   .catch(console.error);
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: "61eade4c6d5acf558c42d9b8", // paste the _id of the test user created in the previous step
-  };
-  next();
-});
-
 // app.use(cors());
 app.use(express.json());
 app.use("/", mainRouter);
@@ -27,3 +20,6 @@ app.use("/", mainRouter);
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 });
+
+app.post("/signin", login);
+app.post("/signup", createUser);

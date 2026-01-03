@@ -1,5 +1,13 @@
 const User = require("../models/user");
-const { DEFAULT, BAD_REQUEST, NOT_FOUND } = require("../utils/errors");
+const bcrypt = require("bcryptjs");
+const {
+  DEFAULT,
+  BAD_REQUEST,
+  NOT_FOUND,
+  DUPLICATE,
+  UNAUTHORIZED,
+} = require("../utils/errors");
+const JWT_SECRET = require("../utils/config");
 
 const getUsers = (req, res) => {
   User.find({})
@@ -27,6 +35,41 @@ const createUser = (req, res) => {
         .status(DEFAULT)
         .send({ message: "An error has occurred on the server" });
     });
+
+  bcrypt
+    .hash(req.body.password, 10)
+    .then((hash) =>
+      User.create({
+        email: req.body.email,
+        password: hash,
+      })
+    )
+    .catch((err) => {
+      if (err) {
+        return res
+          .status(DUPLICATE)
+          .send({ message: "An error has occurred on the server" });
+      }
+      return res
+        .status(DEFAULT)
+        .send({ message: "An error has occurred on the server" });
+    });
+};
+
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password).then((user) => {
+    const token = jwt
+      .sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      })
+      .catch((err) => {
+        res
+          .status(UNAUTHORIZED)
+          .send({ message: "An error has occurred on the server" });
+      });
+  });
 };
 
 const getUser = (req, res) => {
@@ -49,4 +92,4 @@ const getUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser };
+module.exports = { getUsers, createUser, getUser, login };
