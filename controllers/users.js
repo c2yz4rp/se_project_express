@@ -72,8 +72,8 @@ const login = (req, res) => {
   });
 };
 
-const getUser = (req, res) => {
-  const { userId } = req.params;
+const getCurrentUser = (req, res) => {
+  const { userId } = req.user;
   User.findById(userId)
     .then((user) => {
       if (!user) {
@@ -92,4 +92,37 @@ const getUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser, login };
+const updateProfile = (req, res) => {
+  try {
+    const userId = req.user;
+    const { name, email } = req.body;
+
+    if (!name || !email) {
+      return res.status(BAD_REQUEST).send({
+        message: "Name and email are required",
+      });
+    }
+
+    const updatedUser = User.findByIdAndUpdate(
+      userId,
+      { name, email },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(NOT_FOUND).send({ message: "User not found" });
+    }
+
+    res.status(200).send({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
+  } catch (err) {
+    res.status(DEFAULT).send({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};
+
+module.exports = { getUsers, createUser, getCurrentUser, login, updateProfile };
