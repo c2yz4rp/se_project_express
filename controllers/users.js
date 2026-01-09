@@ -7,31 +7,35 @@ const {
   DUPLICATE,
   UNAUTHORIZED,
 } = require("../utils/errors");
-const JWT_SECRET = require("../utils/config");
+const { JWT_SECRET } = require("../utils/config");
+const jwt = require("jsonwebtoken");
 
 const createUser = (req, res) => {
   const { name, avatar, email } = req.body;
 
-  bcrypt
-    .hash(req.body.password, 10)
-    .then((hash) =>
-      User.create({
-        name,
-        avatar,
-        email,
-        password: hash,
+  bcrypt.hash(req.body.password, 10).then((hash) =>
+    User.create({
+      name,
+      avatar,
+      email,
+      password: hash,
+    })
+      .then((createdUser) => {
+        delete createdUser.password;
+        res.status(201).json(createdUser);
       })
-    )
-    .catch((err) => {
-      if (err) {
+
+      .catch((err) => {
+        if (err) {
+          return res
+            .status(DUPLICATE)
+            .send({ message: "An error has occurred on the server" });
+        }
         return res
-          .status(DUPLICATE)
+          .status(DEFAULT)
           .send({ message: "An error has occurred on the server" });
-      }
-      return res
-        .status(DEFAULT)
-        .send({ message: "An error has occurred on the server" });
-    });
+      })
+  );
 };
 
 const login = (req, res) => {
