@@ -1,5 +1,6 @@
-const User = require("../models/user");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const User = require("../models/user");
 const {
   DEFAULT,
   BAD_REQUEST,
@@ -8,7 +9,6 @@ const {
   UNAUTHORIZED,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
-const jwt = require("jsonwebtoken");
 
 const createUser = (req, res) => {
   const { name, avatar, email } = req.body;
@@ -26,10 +26,10 @@ const createUser = (req, res) => {
       })
 
       .catch((err) => {
-        if (err) {
+        if (err.code === 11000) {
           return res
             .status(DUPLICATE)
-            .send({ message: "An error has occurred on the server" });
+            .send({ message: "Email already exists" });
         }
         return res
           .status(DEFAULT)
