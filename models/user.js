@@ -2,8 +2,6 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 
-const { Schema } = mongoose;
-
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -13,7 +11,7 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    required: [true, "The avatar field is required."],
+    // required: [true, "The avatar field is required."],
     validate: {
       validator(value) {
         return validator.isURL(value);
@@ -51,7 +49,6 @@ userSchema.statics.findUserByCredentials = function ({ email, password }) {
         return user;
       });
     });
-  // "no-underscore-dangle": ["error", { "allow": ["_id"]}]
 };
 
 module.exports = mongoose.model("user", userSchema);

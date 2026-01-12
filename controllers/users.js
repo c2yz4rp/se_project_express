@@ -41,20 +41,27 @@ const createUser = (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
 
-  return User.findUserByCredentials({ email, password }).then((user) => {
-    const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-      expiresIn: "7d",
-    });
-    res.send({ token }).catch((err) => {
-      res
-        .status(UNAUTHORIZED)
+  return User.findUserByCredentials({ email, password })
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.send({ token });
+    })
+    .catch((err) => {
+      if (err === !email || !password) {
+        return res
+          .status(UNAUTHORIZED)
+          .send({ message: "Invalid email or password" });
+      }
+      return res
+        .status(DEFAULT)
         .send({ message: "An error has occurred on the server" });
     });
-  });
 };
 
 const getCurrentUser = (req, res) => {
-  const { userId } = req.user._id;
+  const userId = req.user._id;
   User.findById(userId)
     .then((user) => {
       if (!user) {
@@ -74,7 +81,6 @@ const getCurrentUser = (req, res) => {
 };
 
 const updateProfile = (req, res) => {
-  //try {
   const userId = req.user._id;
   const { name, email } = req.body;
 
@@ -87,21 +93,23 @@ const updateProfile = (req, res) => {
   User.findByIdAndUpdate(
     userId,
     { name, email },
-    { new: true, runValidators: true },
-    (updatedUser) => {
+    { new: true, runValidators: true }
+  )
+    .then((updatedUser) => {
       if (!updatedUser) {
         return res.status(NOT_FOUND).send({ message: "User not found" });
       }
 
-      res.status(200).send(updatedUser);
-    }
-  ).catch((err) => {
-    res.status(DEFAULT).send({
-      message: "Server error",
-      error: err.message,
+      return res.status(200).send(updatedUser);
+    })
+    .catch((err) => {
+      if (err.code === 11000) {
+        return res.status(DUPLICATE).send({ message: "Email already exists" });
+      }
+      return res
+        .status(DEFAULT)
+        .send({ message: "An error has occurred on the server" });
     });
-  });
-  //}
 };
 
 module.exports = { createUser, getCurrentUser, login, updateProfile };
