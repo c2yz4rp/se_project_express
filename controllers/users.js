@@ -21,8 +21,12 @@ const createUser = (req, res) => {
       password: hash,
     })
       .then((createdUser) => {
-        delete createdUser.password;
-        res.status(201).json(createdUser);
+        const newUser = {
+          name: createdUser.name,
+          avatar: createdUser.avatar,
+          email: createdUser.email,
+        };
+        res.status(201).json(newUser);
       })
 
       .catch((err) => {
@@ -90,7 +94,7 @@ const updateProfile = (req, res) => {
     });
   }
 
-  User.findByIdAndUpdate(
+  return User.findByIdAndUpdate(
     userId,
     { name, email },
     { new: true, runValidators: true }
