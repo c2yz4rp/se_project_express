@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const auth = require("../middlewares/auth").default;
+const auth = require("../middlewares/auth");
 const {
   getItems,
   createItem,

@@ -1,8 +1,8 @@
-import { verify } from "jsonwebtoken";
-import { UNAUTHORIZED } from "../utils/errors";
-import { JWT_SECRET } from "../utils/config";
+const { verify } = require("jsonwebtoken");
+const { UNAUTHORIZED } = require("../utils/errors");
+const { JWT_SECRET } = require("../utils/config");
 
-export default (req, res, next) => {
+module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
