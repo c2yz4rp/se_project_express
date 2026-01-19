@@ -33,11 +33,11 @@ const createUser = (req, res) => {
         if (err.code === 11000) {
           return res
             .status(DUPLICATE)
-            .send({ message: "Email already exists" });
+            .json({ message: "Email already exists" });
         }
         return res
           .status(DEFAULT)
-          .send({ message: "An error has occurred on the server" });
+          .json({ message: "An error has occurred on the server" });
       })
   );
 };
@@ -50,17 +50,17 @@ const login = (req, res) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      res.send({ token });
+      res.json({ token });
     })
     .catch((err) => {
       if (err === !email || !password) {
         return res
           .status(UNAUTHORIZED)
-          .send({ message: "Invalid email or password" });
+          .json({ message: "Invalid email or password" });
       }
       return res
         .status(DEFAULT)
-        .send({ message: "An error has occurred on the server" });
+        .json({ message: "An error has occurred on the server" });
     });
 };
 
@@ -69,18 +69,18 @@ const getCurrentUser = (req, res) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
+        return res.status(NOT_FOUND).json({ message: "User not found" });
       }
-      return res.send(user);
+      return res.json(user);
     })
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid user ID" });
+        return res.status(BAD_REQUEST).json({ message: "Invalid user ID" });
       }
       return res
         .status(DEFAULT)
-        .send({ message: "An error has occurred on the server" });
+        .json({ message: "An error has occurred on the server" });
     });
 };
 
@@ -89,7 +89,7 @@ const updateProfile = (req, res) => {
   const { name, email } = req.body;
 
   if (!name || !email) {
-    return res.status(BAD_REQUEST).send({
+    return res.status(BAD_REQUEST).json({
       message: "Name and email are required",
     });
   }
@@ -101,18 +101,18 @@ const updateProfile = (req, res) => {
   )
     .then((updatedUser) => {
       if (!updatedUser) {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
+        return res.status(NOT_FOUND).json({ message: "User not found" });
       }
 
-      return res.status(200).send(updatedUser);
+      return res.status(200).json(updatedUser);
     })
     .catch((err) => {
       if (err.code === 11000) {
-        return res.status(DUPLICATE).send({ message: "Email already exists" });
+        return res.status(DUPLICATE).json({ message: "Email already exists" });
       }
       return res
         .status(DEFAULT)
-        .send({ message: "An error has occurred on the server" });
+        .json({ message: "An error has occurred on the server" });
     });
 };
 

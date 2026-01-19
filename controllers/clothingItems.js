@@ -64,7 +64,7 @@ const deleteItem = (req, res) => {
       }
       return clothingItemSchema
         .findByIdAndDelete(itemId)
-        .then((deletedItem) => res.status(200).send(deletedItem));
+        .then((deletedItem) => res.status(200).json(deletedItem));
     })
     .catch((err) => {
       console.error("Item deletion error", err);
@@ -94,7 +94,7 @@ const likeItem = (req, res) => {
       { new: true }
     )
     .orFail()
-    .then((items) => res.status(200).send(items))
+    .then((items) => res.status(200).json(items))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).json({ message: "Item not found" });
