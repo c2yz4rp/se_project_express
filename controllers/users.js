@@ -10,36 +10,43 @@ const {
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
-const createUser = (req, res) => {
-  const { name, avatar, email } = req.body;
+const createUser = async (req, res) => {
+  try {
+    const { name, avatar, email, password } = req.body;
 
-  bcrypt.hash(req.body.password, 10).then((hash) =>
-    User.create({
+    const hash = await bcrypt.hash(password, 10);
+
+    const createdUser = await User.create({
       name,
       avatar,
       email,
       password: hash,
-    })
-      .then((createdUser) => {
-        const newUser = {
-          name: createdUser.name,
-          avatar: createdUser.avatar,
-          email: createdUser.email,
-        };
-        res.status(201).json(newUser);
-      })
+    });
 
-      .catch((err) => {
-        if (err.code === 11000) {
-          return res
-            .status(DUPLICATE)
-            .json({ message: "Email already exists" });
-        }
-        return res
-          .status(DEFAULT)
-          .json({ message: "An error has occurred on the server" });
-      })
-  );
+    res.status(201).json({
+      name: createdUser.name,
+      avatar: createdUser.avatar,
+      email: createdUser.email,
+    });
+  } catch (err) {
+    console.error(err);
+
+    if (err.code === 11000) {
+      return res.status(DUPLICATE).send({ message: "Email already exists" });
+    }
+
+    if (err.name === "ValidationError") {
+      return res.status(BAD_REQUEST).send({
+        message: Object.values(err.errors)
+          .map((e) => e.message)
+          .join(", "),
+      });
+    }
+
+    return res
+      .status(DEFAULT)
+      .send({ message: "An error has occurred on the server" });
+  }
 };
 
 const login = (req, res) => {
@@ -57,6 +64,13 @@ const login = (req, res) => {
         return res
           .status(UNAUTHORIZED)
           .json({ message: "Invalid email or password" });
+      }
+      if (err.name === "ValidationError") {
+        return res.status(BAD_REQUEST).send({
+          message: Object.values(err.errors)
+            .map((e) => e.message)
+            .join(", "),
+        });
       }
       return res
         .status(DEFAULT)
