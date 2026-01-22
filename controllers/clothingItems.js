@@ -8,7 +8,6 @@ const {
 } = require("../utils/errors");
 
 const createItem = (req, res) => {
-  console.log("Received user ID:", req.user._id);
 
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
@@ -16,11 +15,9 @@ const createItem = (req, res) => {
   clothingItemSchema
     .create({ name, weather, imageUrl, owner })
     .then((item) => {
-      console.log(item);
       res.status(200).json(item);
     })
     .catch((error) => {
-      console.error(error.name);
 
       if (error.name === "ValidationError") {
         return res.status(BAD_REQUEST).json({ message: "Validation error" });
@@ -37,15 +34,14 @@ const getItems = (req, res) => {
     .find({})
     .then((items) => res.status(200).json(items))
     .catch((err) => {
-      console.error(err);
-      console.log(err.name);
+      console.log(err);
       return res.status(DEFAULT).json({ message: "Internal Server Error" });
     });
 };
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-  console.log("deleting Clothing Items");
+  //console.log("deleting Clothing Items");
 
   if (!req.user) {
     return res
@@ -67,7 +63,7 @@ const deleteItem = (req, res) => {
         .then((deletedItem) => res.status(200).json(deletedItem));
     })
     .catch((err) => {
-      console.error("Item deletion error", err);
+      //console.error("Item deletion error", err);
 
       if (err.name === "CastError") {
         return res

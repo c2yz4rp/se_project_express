@@ -29,7 +29,6 @@ const createUser = async (req, res) => {
       email: createdUser.email,
     });
   } catch (err) {
-    console.error(err);
 
     if (err.code === 11000) {
       return res.status(DUPLICATE).send({ message: "Email already exists" });
@@ -52,6 +51,12 @@ const createUser = async (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
 
+if (!email || !password) {
+   console.log( email, password);
+    return res
+      .status(BAD_REQUEST)
+      .send({ message: "Email and password are required" });
+  }
   return User.findUserByCredentials({ email, password })
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
@@ -60,21 +65,15 @@ const login = (req, res) => {
       res.json({ token });
     })
     .catch((err) => {
-      if (err === !email || !password) {
+      console.log(err.message);
+      if (err.message === "Incorrect username or password") {
         return res
           .status(UNAUTHORIZED)
-          .json({ message: "Invalid email or password" });
+          .send({ message: "Incorrect email or password" });
       }
-      if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({
-          message: Object.values(err.errors)
-            .map((e) => e.message)
-            .join(", "),
-        });
-      }
-      return res
-        .status(DEFAULT)
-        .json({ message: "An error has occurred on the server" });
+      return res.status(DEFAULT).send({
+        message: "An error has occurred on the server",
+      });
     });
 };
 
@@ -88,7 +87,7 @@ const getCurrentUser = (req, res) => {
       return res.json(user);
     })
     .catch((err) => {
-      console.error(err);
+
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).json({ message: "Invalid user ID" });
       }
@@ -99,34 +98,39 @@ const getCurrentUser = (req, res) => {
 };
 
 const updateProfile = (req, res) => {
-  const userId = req.user._id;
-  const { name, email } = req.body;
 
-  if (!name || !email) {
-    return res.status(BAD_REQUEST).json({
-      message: "Name and email are required",
-    });
-  }
-
-  return User.findByIdAndUpdate(
-    userId,
-    { name, email },
-    { new: true, runValidators: true }
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name: req.body.name, avatar: req.body.avatar },
+    {
+      new: true,
+      runValidators: true,
+    }
   )
-    .then((updatedUser) => {
-      if (!updatedUser) {
-        return res.status(NOT_FOUND).json({ message: "User not found" });
-      }
-
-      return res.status(200).json(updatedUser);
+    .orFail(() => {
+      const error = new Error("User ID not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
     })
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.code === 11000) {
-        return res.status(DUPLICATE).json({ message: "Email already exists" });
+      console.error(err);
+
+      if (err.name === "ValidationError") {
+        res.status(BAD_REQUEST).send({
+          message: `${Object.values(err.errors)
+            .map((error) => error.message)
+            .join(", ")}`,
+        });
+
+      } else if (err.statusCode === NOT_FOUND) {
+        res.status(NOT_FOUND).send({ message: err.message });
+
+      } else {
+        res
+          .status(DEFAULT)
+          .send({ message: "An error has occurred on the server" });
       }
-      return res
-        .status(DEFAULT)
-        .json({ message: "An error has occurred on the server" });
     });
 };
 
