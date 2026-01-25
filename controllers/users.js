@@ -23,13 +23,12 @@ const createUser = async (req, res) => {
       password: hash,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       name: createdUser.name,
       avatar: createdUser.avatar,
       email: createdUser.email,
     });
   } catch (err) {
-
     if (err.code === 11000) {
       return res.status(DUPLICATE).send({ message: "Email already exists" });
     }
@@ -51,8 +50,7 @@ const createUser = async (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
 
-if (!email || !password) {
-   console.log( email, password);
+  if (!email || !password) {
     return res
       .status(BAD_REQUEST)
       .send({ message: "Email and password are required" });
@@ -65,7 +63,6 @@ if (!email || !password) {
       res.json({ token });
     })
     .catch((err) => {
-      console.log(err.message);
       if (err.message === "Incorrect username or password") {
         return res
           .status(UNAUTHORIZED)
@@ -87,7 +84,6 @@ const getCurrentUser = (req, res) => {
       return res.json(user);
     })
     .catch((err) => {
-
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).json({ message: "Invalid user ID" });
       }
@@ -98,7 +94,6 @@ const getCurrentUser = (req, res) => {
 };
 
 const updateProfile = (req, res) => {
-
   User.findByIdAndUpdate(
     req.user._id,
     { name: req.body.name, avatar: req.body.avatar },
@@ -112,20 +107,16 @@ const updateProfile = (req, res) => {
       error.statusCode = NOT_FOUND;
       throw error;
     })
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send(user))
     .catch((err) => {
-      console.error(err);
-
       if (err.name === "ValidationError") {
         res.status(BAD_REQUEST).send({
           message: `${Object.values(err.errors)
             .map((error) => error.message)
             .join(", ")}`,
         });
-
       } else if (err.statusCode === NOT_FOUND) {
         res.status(NOT_FOUND).send({ message: err.message });
-
       } else {
         res
           .status(DEFAULT)

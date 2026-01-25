@@ -8,7 +8,6 @@ const {
 } = require("../utils/errors");
 
 const createItem = (req, res) => {
-
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
@@ -18,7 +17,6 @@ const createItem = (req, res) => {
       res.status(200).json(item);
     })
     .catch((error) => {
-
       if (error.name === "ValidationError") {
         return res.status(BAD_REQUEST).json({ message: "Validation error" });
       }
@@ -27,9 +25,6 @@ const createItem = (req, res) => {
 };
 
 const getItems = (req, res) => {
-  const { itemId } = req.params;
-  console.log(itemId);
-
   clothingItemSchema
     .find({})
     .then((items) => res.status(200).json(items))
@@ -41,8 +36,6 @@ const getItems = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-  //console.log("deleting Clothing Items");
-
   if (!req.user) {
     return res
       .status(UNAUTHORIZED)
@@ -63,8 +56,6 @@ const deleteItem = (req, res) => {
         .then((deletedItem) => res.status(200).json(deletedItem));
     })
     .catch((err) => {
-      //console.error("Item deletion error", err);
-
       if (err.name === "CastError") {
         return res
           .status(BAD_REQUEST)
